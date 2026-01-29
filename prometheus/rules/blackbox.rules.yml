@@ -1,0 +1,11 @@
+groups:
+  - name: blackbox
+    rules:
+      - alert: EndpointDown
+        expr: probe_success == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Endpoint down: {{ $labels.instance }}"
+          description: "Blackbox probe failed for {{ $labels.instance }} (job={{ $labels.job }})"

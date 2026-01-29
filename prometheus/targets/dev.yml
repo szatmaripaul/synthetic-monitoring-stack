@@ -2,6 +2,8 @@
     - http://192.168.1.150:3001
     - https://example.com
     - https://example.org
+    - http://127.0.1.1:1
+    - http://127.0.0.1:9
   labels:
     job: web
     env: dev
