@@ -4,6 +4,12 @@
     - https://example.org
     - http://127.0.1.1:1
     - http://127.0.0.1:9
+    - http://prometheus:9090
+    - http://localhost:9093
+    - http://localhost:3000/
+    - http://localhost:9115
+    - https://www.cloudflare.com
+    - https://www.google.com/generate_204
   labels:
     job: web
     env: dev
