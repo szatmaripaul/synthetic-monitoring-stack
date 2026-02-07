@@ -53,7 +53,130 @@ services:
     depends_on:
       - prometheus
 
+  alerta:
+    image: alerta/alerta-web
+    environment:
+      DATABASE_URL: ${ALERTA_DATABASE_URL}
+      AUTH_REQUIRED: "True"
+      ADMIN_PASSWORD: ${ALERTA_ADMIN_PASSWORD}
+    volumes:
+      - ./ticketing/alerta/alerta.yml:/app/alerta.yml:ro
+    depends_on:
+      - alerta-db
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  alerta-db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: alerta
+      POSTGRES_USER: alerta
+      POSTGRES_PASSWORD: alerta_pw
+    volumes:
+      - alerta_pg:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  zammad-db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: zammad
+      POSTGRES_USER: zammad
+      POSTGRES_PASSWORD: zammad_pw
+    volumes:
+      - zammad_pg:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  zammad-redis:
+    image: redis:7
+    restart: unless-stopped
+
+  zammad-es:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    volumes:
+      - zammad_es:/usr/share/elasticsearch/data
+    restart: unless-stopped
+
+  zammad-init:
+    image: zammad/zammad:latest
+    environment:
+      POSTGRESQL_HOST: zammad-db
+      POSTGRESQL_PORT: "5432"
+      POSTGRESQL_USER: zammad
+      POSTGRESQL_PASS: zammad_pw
+      POSTGRESQL_DB: zammad
+
+      REDIS_URL: redis://zammad-redis:6379
+
+      ELASTICSEARCH_URL: http://zammad-es:9200
+    depends_on:
+      - zammad-db
+      - zammad-redis
+      - zammad-es
+    command: ["init"]
+    restart: "no"
+
+  zammad:
+    image: zammad/zammad:latest
+    ports:
+      - "8081:8080"
+    environment:
+      POSTGRESQL_HOST: zammad-db
+      POSTGRESQL_PORT: "5432"
+      POSTGRESQL_USER: zammad
+      POSTGRESQL_PASS: zammad_pw
+      POSTGRESQL_DB: zammad
+
+      REDIS_URL: redis://zammad-redis:6379
+
+      ELASTICSEARCH_URL: http://zammad-es:9200
+    depends_on:
+      - zammad-init
+    command: ["railsserver"]
+    restart: unless-stopped
+
+  zammad-scheduler:
+    image: zammad/zammad:latest
+    environment:
+      POSTGRESQL_HOST: zammad-db
+      POSTGRESQL_PORT: "5432"
+      POSTGRESQL_USER: zammad
+      POSTGRESQL_PASS: zammad_pw
+      POSTGRESQL_DB: zammad
+
+      REDIS_URL: redis://zammad-redis:6379
+
+      ELASTICSEARCH_URL: http://zammad-es:9200
+    depends_on:
+      - zammad-init
+    command: ["scheduler"]
+    restart: unless-stopped
+
+  zammad-websocket:
+    image: zammad/zammad:latest
+    environment:
+      POSTGRESQL_HOST: zammad-db
+      POSTGRESQL_PORT: "5432"
+      POSTGRESQL_USER: zammad
+      POSTGRESQL_PASS: zammad_pw
+      POSTGRESQL_DB: zammad
+
+      REDIS_URL: redis://zammad-redis:6379
+
+      ELASTICSEARCH_URL: http://zammad-es:9200
+    depends_on:
+      - zammad-init
+    command: ["websocket"]
+    restart: unless-stopped
+
 volumes:
   prometheus_data:
   grafana_data:
   alertmanager_data:
+  alerta_pg:
+  zammad_pg:
+  zammad_es:

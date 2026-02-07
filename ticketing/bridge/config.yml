@@ -1,0 +1,20 @@
+# Default Zammad group and priority
+default_group: "Users"
+default_priority: "2 normal"
+
+# Map alert severity → ticket priority
+severity_map:
+  critical:
+    priority: "3 high"
+  major:
+    priority: "3 high"
+  minor:
+    priority: "2 normal"
+  warning:
+    priority: "1 low"
+
+# Optional: map alert label "team" → Zammad group
+team_group_map:
+  platform: "Platform"
+  devops: "DevOps"
+  sre: "SRE"

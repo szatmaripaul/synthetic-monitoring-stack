@@ -2,13 +2,16 @@ global:
   resolve_timeout: 5m
 
 route:
-  receiver: "default"
-  group_by: ["alertname", "job", "instance"]
-  group_wait: 10s
-  group_interval: 1m
+
+  receiver: "alerta"
+  group_by: ["alertname", "service", "job", "instance"]
+  group_wait: 30s
+  group_interval: 5m
   repeat_interval: 4h
 
 receivers:
-  - name: "default"
-    # Local test: just keep alerts visible in the Alertmanager UI.
-    # We'll add email/Slack/Teams later.
+
+  - name: alerta
+    webhook_configs:
+      - url: "http://alerta:8080/webhooks/prometheus"
+        send_resolved: true
