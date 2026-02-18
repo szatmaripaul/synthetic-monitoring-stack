@@ -1,0 +1,12 @@
+groups:
+- name: test
+  rules:
+  - alert: TestAlert
+    expr: vector(1)
+    for: 10s
+    labels:
+      severity: critical
+      service: synthetic
+    annotations:
+      summary: "Test alert to verify Alertmanager -> Alerta"
+      description: "This is a test alert that always fires."
