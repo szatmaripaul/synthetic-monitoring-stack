@@ -173,6 +173,13 @@ services:
     command: ["websocket"]
     restart: unless-stopped
 
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    ports:
+    - "9100:9100"
+
 volumes:
   prometheus_data:
   grafana_data:
